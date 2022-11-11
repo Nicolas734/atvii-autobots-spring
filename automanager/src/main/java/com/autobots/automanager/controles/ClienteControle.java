@@ -34,13 +34,14 @@ public class ClienteControle {
 	public ResponseEntity<Cliente> obterCliente(@PathVariable long id) {
 		List<Cliente> clientes = repositorio.findAll();
 		Cliente cliente = selecionador.selecionar(clientes, id);
+		HttpStatus status = null;
 		if(cliente == null) {
-			return new ResponseEntity<Cliente>(cliente,HttpStatus.NOT_FOUND);
+			status = HttpStatus.NOT_FOUND;
 		}else {
 			adicionadorLink.adicionarLink(cliente);
-			return new ResponseEntity<Cliente>(cliente,HttpStatus.FOUND);
+			status = HttpStatus.FOUND;
 		}
-		
+		return new ResponseEntity<Cliente>(cliente,status);
 	}
 
 	@GetMapping("/clientes")
@@ -51,8 +52,10 @@ public class ClienteControle {
 	}
 
 	@PostMapping("/cadastro")
-	public void cadastrarCliente(@RequestBody Cliente cliente) {
-		repositorio.save(cliente);
+	public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
+		Cliente resposta = repositorio.save(cliente);
+		adicionadorLink.adicionarLinkCriar(resposta);
+		return new ResponseEntity<Cliente>(cliente,HttpStatus.CREATED);
 	}
 
 	@PutMapping("/atualizar")

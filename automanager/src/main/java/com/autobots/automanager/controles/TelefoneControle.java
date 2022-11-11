@@ -3,6 +3,8 @@ package com.autobots.automanager.controles;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Telefone;
+import com.autobots.automanager.modelo.AdicionadorLinkTelefone;
 import com.autobots.automanager.modelo.TelefoneAtualizador;
 import com.autobots.automanager.repositorios.TelefoneRepositorio;
 
@@ -20,16 +23,27 @@ import com.autobots.automanager.repositorios.TelefoneRepositorio;
 public class TelefoneControle {
 	@Autowired
 	private TelefoneRepositorio repositorio;
+	@Autowired
+	private AdicionadorLinkTelefone adicionadorLink;
 	
 	@GetMapping("/telefones")
-	public List<Telefone> buscarTelefones(){
-		return repositorio.findAll();
+	public ResponseEntity<List<Telefone>> buscarTelefones(){
+		List<Telefone> telefones = repositorio.findAll();
+		adicionadorLink.adicionarLink(telefones);
+		return new ResponseEntity<List<Telefone>>(telefones,HttpStatus.FOUND);
 	}
 	
 	@GetMapping("/telefone/{id}")
-	public Telefone buscarTelefone(@PathVariable Long id) {
-		Telefone selecionado = repositorio.findById(id).get();
-		return selecionado;
+	public ResponseEntity<Telefone> buscarTelefone(@PathVariable Long id) {
+		Telefone selecionado = repositorio.findById(id).orElse(null);
+		HttpStatus status = null;
+		if(selecionado == null) {
+			status = HttpStatus.NOT_FOUND;
+		}else {
+			adicionadorLink.adicionarLink(selecionado);
+			status = HttpStatus.FOUND;
+		}
+		return new ResponseEntity<Telefone>(selecionado,status);
 	}
 	
 	@PutMapping("/atualizar")

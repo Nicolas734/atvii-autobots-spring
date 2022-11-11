@@ -3,6 +3,8 @@ package com.autobots.automanager.controles;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Endereco;
+import com.autobots.automanager.modelo.AdicionadorLinkEndereco;
 import com.autobots.automanager.modelo.EnderecoAtualizador;
 import com.autobots.automanager.repositorios.EnderecoRepositorio;
 
@@ -20,15 +23,27 @@ public class EnderecoControle {
 	
 	@Autowired
 	private EnderecoRepositorio repositorio;
+	@Autowired
+	private AdicionadorLinkEndereco adicionadorLink;
 	
 	@GetMapping("/enderecos")
-	public List<Endereco> buscarEnderecos(){
-		return repositorio.findAll();
+	public ResponseEntity<List<Endereco>> buscarEnderecos(){
+		List<Endereco> enderecos = repositorio.findAll();
+		adicionadorLink.adicionarLink(enderecos);
+		return new ResponseEntity<List<Endereco>>(enderecos,HttpStatus.FOUND);
 	}
 	
 	@GetMapping("/endereco/{id}")
-	public Endereco buscarEnderecoPorId(@PathVariable Long id) {
-		return repositorio.findById(id).get();
+	public ResponseEntity<Endereco> buscarEnderecoPorId(@PathVariable Long id) {
+		Endereco endereco = repositorio.findById(id).orElse(null);
+		HttpStatus status = null;
+		if(endereco == null) {
+			status = HttpStatus.NOT_FOUND;
+		}else {
+			status = HttpStatus.FOUND;
+			adicionadorLink.adicionarLink(endereco);
+		}
+		return new ResponseEntity<Endereco>(endereco,status);
 	}
 	
 	@PutMapping("/atualizar")

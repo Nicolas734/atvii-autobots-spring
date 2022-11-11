@@ -36,12 +36,14 @@ public class DocumentoControle {
 	@GetMapping("/documento/{id}")
 	public ResponseEntity<Documento> buscarDocumentoPorId(@PathVariable Long id) {
 		Documento documento = repositorio.findById(id).orElse(null);
+		HttpStatus status = null;
 		if(documento == null) {
-			return new ResponseEntity<Documento>(documento,HttpStatus.NOT_FOUND);
+			status = HttpStatus.NOT_FOUND;
 		}else{
 			adicionadorLink.adicionarLink(documento);
-			return new ResponseEntity<Documento>(documento,HttpStatus.FOUND);
+			status = HttpStatus.FOUND;
 		}
+		return new ResponseEntity<Documento>(documento,status);
 	}
 	
 	@PutMapping("/atualizar")
