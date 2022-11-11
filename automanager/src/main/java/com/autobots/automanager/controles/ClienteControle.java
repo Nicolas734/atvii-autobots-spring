@@ -3,6 +3,8 @@ package com.autobots.automanager.controles;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,18 +31,23 @@ public class ClienteControle {
 	private AdicionadorLinkCliente adicionadorLink;
 
 	@GetMapping("/cliente/{id}")
-	public Cliente obterCliente(@PathVariable long id) {
+	public ResponseEntity<Cliente> obterCliente(@PathVariable long id) {
 		List<Cliente> clientes = repositorio.findAll();
 		Cliente cliente = selecionador.selecionar(clientes, id);
-		adicionadorLink.adicionarLink(cliente);
-		return cliente;
+		if(cliente == null) {
+			return new ResponseEntity<Cliente>(cliente,HttpStatus.NOT_FOUND);
+		}else {
+			adicionadorLink.adicionarLink(cliente);
+			return new ResponseEntity<Cliente>(cliente,HttpStatus.FOUND);
+		}
+		
 	}
 
 	@GetMapping("/clientes")
-	public List<Cliente> obterClientes() {
+	public ResponseEntity<List<Cliente>> obterClientes() {
 		List<Cliente> clientes = repositorio.findAll();
 		adicionadorLink.adicionarLink(clientes);
-		return clientes;
+		return new ResponseEntity<List<Cliente>>(clientes,HttpStatus.FOUND);
 	}
 
 	@PostMapping("/cadastro")

@@ -3,6 +3,8 @@ package com.autobots.automanager.controles;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,17 +27,21 @@ public class DocumentoControle {
 	private AdicionadorLinkDocumento adicionadorLink;
 	
 	@GetMapping("/documentos")
-	public List<Documento> buscarDocumentos(){
+	public ResponseEntity<List<Documento>> buscarDocumentos(){
 		List<Documento> documentos = repositorio.findAll();
 		adicionadorLink.adicionarLink(documentos);
-		return documentos;
+		return new ResponseEntity<List<Documento>>(documentos,HttpStatus.FOUND);
 	}
 	
 	@GetMapping("/documento/{id}")
-	public Documento buscarDocumentoPorId(@PathVariable Long id) {
-		Documento documento = repositorio.findById(id).get();
-		adicionadorLink.adicionarLink(documento);
-		return documento;
+	public ResponseEntity<Documento> buscarDocumentoPorId(@PathVariable Long id) {
+		Documento documento = repositorio.findById(id).orElse(null);
+		if(documento == null) {
+			return new ResponseEntity<Documento>(documento,HttpStatus.NOT_FOUND);
+		}else{
+			adicionadorLink.adicionarLink(documento);
+			return new ResponseEntity<Documento>(documento,HttpStatus.FOUND);
+		}
 	}
 	
 	@PutMapping("/atualizar")
