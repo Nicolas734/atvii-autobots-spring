@@ -30,6 +30,10 @@ public class DocumentoControle {
 	public ResponseEntity<List<Documento>> buscarDocumentos(){
 		List<Documento> documentos = repositorio.findAll();
 		adicionadorLink.adicionarLink(documentos);
+		for(Documento documento: documentos) {
+			adicionadorLink.adicionarLinkUpdate(documento);
+			adicionadorLink.adicionarLinkDelete(documento);
+		}
 		return new ResponseEntity<List<Documento>>(documentos,HttpStatus.FOUND);
 	}
 	
@@ -41,17 +45,20 @@ public class DocumentoControle {
 			status = HttpStatus.NOT_FOUND;
 		}else{
 			adicionadorLink.adicionarLink(documento);
+			adicionadorLink.adicionarLinkUpdate(documento);
+			adicionadorLink.adicionarLinkDelete(documento);
 			status = HttpStatus.FOUND;
 		}
 		return new ResponseEntity<Documento>(documento,status);
 	}
 	
 	@PutMapping("/atualizar")
-	public void editarDocumentoPorId(@RequestBody Documento atualizacao) {
+	public ResponseEntity<Documento> editarDocumentoPorId(@RequestBody Documento atualizacao) {
 		Documento documentoSelecionado = repositorio.getById(atualizacao.getId());
 		DocumentoAtualizador atualizador = new DocumentoAtualizador();
 		atualizador.atualizar(documentoSelecionado, atualizacao);
 		repositorio.save(documentoSelecionado);
+		return new ResponseEntity<Documento>(documentoSelecionado,HttpStatus.ACCEPTED);
 	}
 	
 	

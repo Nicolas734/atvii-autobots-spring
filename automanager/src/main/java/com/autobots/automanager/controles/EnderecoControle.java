@@ -30,6 +30,10 @@ public class EnderecoControle {
 	public ResponseEntity<List<Endereco>> buscarEnderecos(){
 		List<Endereco> enderecos = repositorio.findAll();
 		adicionadorLink.adicionarLink(enderecos);
+		for(Endereco endereco: enderecos) {
+			adicionadorLink.adicionarLinkUpdate(endereco);
+			adicionadorLink.adicionarLinkDelete(endereco);
+		}
 		return new ResponseEntity<List<Endereco>>(enderecos,HttpStatus.FOUND);
 	}
 	
@@ -42,15 +46,18 @@ public class EnderecoControle {
 		}else {
 			status = HttpStatus.FOUND;
 			adicionadorLink.adicionarLink(endereco);
+			adicionadorLink.adicionarLinkUpdate(endereco);
+			adicionadorLink.adicionarLinkDelete(endereco);
 		}
 		return new ResponseEntity<Endereco>(endereco,status);
 	}
 	
 	@PutMapping("/atualizar")
-	public void editarEnderecoPorId(@RequestBody Endereco atualizacao) {
+	public ResponseEntity<Endereco> editarEnderecoPorId(@RequestBody Endereco atualizacao) {
 		Endereco enderecoSelecionado = repositorio.getById(atualizacao.getId());
 		EnderecoAtualizador atualizador = new EnderecoAtualizador();
 		atualizador.atualizar(enderecoSelecionado, atualizacao);
 		repositorio.save(enderecoSelecionado);
+		return new ResponseEntity<Endereco>(enderecoSelecionado, HttpStatus.ACCEPTED);
 	}
 }

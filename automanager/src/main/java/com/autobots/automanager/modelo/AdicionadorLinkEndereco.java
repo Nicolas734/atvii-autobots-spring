@@ -7,6 +7,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
 import com.autobots.automanager.controles.EnderecoControle;
+import com.autobots.automanager.controles.ExcluirDocumento;
 import com.autobots.automanager.entidades.Endereco;
 
 @Component
@@ -20,7 +21,7 @@ public class AdicionadorLinkEndereco implements AdicionadorLink<Endereco>{
 					.linkTo(WebMvcLinkBuilder
 							.methodOn(EnderecoControle.class)
 							.buscarEnderecoPorId(id))
-					.withSelfRel();
+					.withRel("Visualizar endereco de id " + id);
 			endereco.add(linkProprio);
 		}
 	}
@@ -37,13 +38,22 @@ public class AdicionadorLinkEndereco implements AdicionadorLink<Endereco>{
 	}
 
 	@Override
-	public void adicionarLinkCriar(Endereco objeto) {
-		long id = objeto.getId();
+	public void adicionarLinkUpdate(Endereco objeto) {
 		Link linkProprio = WebMvcLinkBuilder
 				.linkTo(WebMvcLinkBuilder
 						.methodOn(EnderecoControle.class)
-						.buscarEnderecoPorId(id))
-				.withSelfRel();
+						.editarEnderecoPorId(objeto))
+				.withRel("Atualizar endereco de id " + objeto.getId());
+		objeto.add(linkProprio);
+	}
+
+	@Override
+	public void adicionarLinkDelete(Endereco objeto) {
+		Link linkProprio = WebMvcLinkBuilder
+				.linkTo(WebMvcLinkBuilder
+						.methodOn(ExcluirDocumento.class)
+						.excluirDocumento(objeto.getId()))
+				.withRel("Excluir endereco de id " + objeto.getId());
 		objeto.add(linkProprio);
 	}
 }

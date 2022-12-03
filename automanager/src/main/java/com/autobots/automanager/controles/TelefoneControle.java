@@ -30,6 +30,10 @@ public class TelefoneControle {
 	public ResponseEntity<List<Telefone>> buscarTelefones(){
 		List<Telefone> telefones = repositorio.findAll();
 		adicionadorLink.adicionarLink(telefones);
+		for(Telefone telefone: telefones) {
+			adicionadorLink.adicionarLinkUpdate(telefone);
+			adicionadorLink.adicionarLinkDelete(telefone);
+		}
 		return new ResponseEntity<List<Telefone>>(telefones,HttpStatus.FOUND);
 	}
 	
@@ -41,16 +45,19 @@ public class TelefoneControle {
 			status = HttpStatus.NOT_FOUND;
 		}else {
 			adicionadorLink.adicionarLink(selecionado);
+			adicionadorLink.adicionarLinkUpdate(selecionado);
+			adicionadorLink.adicionarLinkDelete(selecionado);
 			status = HttpStatus.FOUND;
 		}
 		return new ResponseEntity<Telefone>(selecionado,status);
 	}
 	
 	@PutMapping("/atualizar")
-	public void editarTelefonePorId(@RequestBody Telefone atualizacao) {
+	public ResponseEntity<Telefone> editarTelefonePorId(@RequestBody Telefone atualizacao) {
 		Telefone telefoneSelecionado = repositorio.getById(atualizacao.getId());
 		TelefoneAtualizador atualizador = new TelefoneAtualizador();
 		atualizador.atualizar(telefoneSelecionado, atualizacao);
 		repositorio.save(telefoneSelecionado);
+		return new ResponseEntity<Telefone>(telefoneSelecionado,HttpStatus.ACCEPTED);
 	}
 }

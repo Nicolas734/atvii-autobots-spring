@@ -39,6 +39,8 @@ public class ClienteControle {
 			status = HttpStatus.NOT_FOUND;
 		}else {
 			adicionadorLink.adicionarLink(cliente);
+			adicionadorLink.adicionarLinkUpdate(cliente);
+			adicionadorLink.adicionarLinkDelete(cliente);
 			status = HttpStatus.FOUND;
 		}
 		return new ResponseEntity<Cliente>(cliente,status);
@@ -48,27 +50,34 @@ public class ClienteControle {
 	public ResponseEntity<List<Cliente>> obterClientes() {
 		List<Cliente> clientes = repositorio.findAll();
 		adicionadorLink.adicionarLink(clientes);
+		for(Cliente cliente: clientes) {
+			adicionadorLink.adicionarLinkUpdate(cliente);
+			adicionadorLink.adicionarLinkDelete(cliente);
+		}
 		return new ResponseEntity<List<Cliente>>(clientes,HttpStatus.FOUND);
 	}
 
 	@PostMapping("/cadastro")
 	public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
 		Cliente resposta = repositorio.save(cliente);
-		adicionadorLink.adicionarLinkCriar(resposta);
+		adicionadorLink.adicionarLinkUpdate(resposta);
+		adicionadorLink.adicionarLinkDelete(resposta);
 		return new ResponseEntity<Cliente>(cliente,HttpStatus.CREATED);
 	}
 
 	@PutMapping("/atualizar")
-	public void atualizarCliente(@RequestBody Cliente atualizacao) {
+	public ResponseEntity<Cliente> atualizarCliente(@RequestBody Cliente atualizacao) {
 		Cliente cliente = repositorio.getById(atualizacao.getId());
 		ClienteAtualizador atualizador = new ClienteAtualizador();
 		atualizador.atualizar(cliente, atualizacao);
 		repositorio.save(cliente);
+		return new ResponseEntity<Cliente>(cliente,HttpStatus.ACCEPTED);
 	}
 
 	@DeleteMapping("/excluir")
-	public void excluirCliente(@RequestBody Cliente exclusao) {
+	public ResponseEntity<?> excluirCliente(@RequestBody Cliente exclusao) {
 		Cliente cliente = repositorio.getById(exclusao.getId());
 		repositorio.delete(cliente);
+		return new ResponseEntity<>("Excluido com sucesso...",HttpStatus.ACCEPTED);
 	}
 }
